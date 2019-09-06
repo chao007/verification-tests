@@ -95,7 +95,7 @@ Feature: ResourceQuata for storage
     Then the step should succeed
     And the pod named "mypod-#{ cb.i }" becomes ready
 
-    And admin ensures "#{ pvc.volume_name }" pv is deleted after scenario
+    And admin ensures "<%= pvc('pvc-#{ cb.i }').volume_name %>" pv is deleted after scenario
     """
 
     # Try to exceed the 10Mi storage
