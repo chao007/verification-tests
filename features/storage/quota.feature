@@ -87,7 +87,14 @@ Feature: ResourceQuata for storage
       | ["spec"]["storageClassName"]                 | sc-<%= project.name %> |
       | ["spec"]["resources"]["requests"]["storage"] | 4Mi                    |
     Then the step should succeed
-    And the "pvc-#{ cb.i }" PVC becomes :bound
+
+    When I run oc create over "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pod.yaml" replacing paths:
+      | ["spec"]["volumes"][0]["persistentVolumeClaim"]["claimName"] | pvc-#{ cb.i }   |
+      | ["metadata"]["name"]                                         | mypod-#{ cb.i } |
+      | ["spec"]["containers"][0]["volumeMounts"][0]["mountPath"]    | /mnt/quota      |
+    Then the step should succeed
+    And the pod named "mypod-#{ cb.i }" becomes ready
+
     And admin ensures "#{ pvc.volume_name }" pv is deleted after scenario
     """
 
@@ -109,7 +116,14 @@ Feature: ResourceQuata for storage
       | ["spec"]["storageClassName"]                 | sc-<%= project.name %> |
       | ["spec"]["resources"]["requests"]["storage"] | 1Mi                    |
     Then the step should succeed
-    And the "pvcnew" PVC becomes :bound
+
+    When I run oc create over "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pod.yaml" replacing paths:
+      | ["spec"]["volumes"][0]["persistentVolumeClaim"]["claimName"] | pvcnew     |
+      | ["metadata"]["name"]                                         | mypodnew   |
+      | ["spec"]["containers"][0]["volumeMounts"][0]["mountPath"]    | /mnt/quota |
+    Then the step should succeed
+    And the pod named "mypodnew" becomes ready
+
     And admin ensures "<%= pvc('pvcnew').volume_name %>" pv is deleted after scenario
 
     When I create a dynamic pvc from "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pvc.json" replacing paths:
@@ -131,7 +145,13 @@ Feature: ResourceQuata for storage
       | ["spec"]["storageClassName"]                 | sc1-<%= project.name %>  |
       | ["spec"]["resources"]["requests"]["storage"] | 11Mi                     |
     Then the step should succeed
-    And the "mypvc1" PVC becomes :bound
+    When I run oc create over "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pod.yaml" replacing paths:
+      | ["spec"]["volumes"][0]["persistentVolumeClaim"]["claimName"] | mypvc1     |
+      | ["metadata"]["name"]                                         | mypod1     |
+      | ["spec"]["containers"][0]["volumeMounts"][0]["mountPath"]    | /mnt/quota |
+    Then the step should succeed
+    And the pod named "mypod1" becomes ready
+    Given I ensure "mypod1" pod is deleted
     Given I ensure "mypvc1" pvc is deleted
     Given I switch to cluster admin pseudo user
     And I wait for the resource "pv" named "<%= pvc.volume_name %>" to disappear within 300 seconds
