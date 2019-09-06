@@ -94,9 +94,11 @@ Feature: ResourceQuata for storage
       | ["spec"]["containers"][0]["volumeMounts"][0]["mountPath"]    | /mnt/quota      |
     Then the step should succeed
     And the pod named "mypod-#{ cb.i }" becomes ready
-
-    And admin ensures "<%= pvc(pvc-#{ cb.i }).volume_name %>" pv is deleted after scenario
+    
     """
+
+    #And admin ensures "<%= pvc(pvc-#{ cb.i }).volume_name %>" pv is deleted after scenario
+    #"""
 
     # Try to exceed the 10Mi storage
     When I create a dynamic pvc from "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pvc.json" replacing paths:
@@ -124,7 +126,7 @@ Feature: ResourceQuata for storage
     Then the step should succeed
     And the pod named "mypodnew" becomes ready
 
-    And admin ensures "<%= pvc('pvcnew').volume_name %>" pv is deleted after scenario
+    #And admin ensures "<%= pvc('pvcnew').volume_name %>" pv is deleted after scenario
 
     When I create a dynamic pvc from "https://raw.githubusercontent.com/openshift-qe/v3-testfiles/master/storage/misc/pvc.json" replacing paths:
       | ["metadata"]["name"]                         | pvcnew2                |
