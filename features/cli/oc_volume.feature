@@ -50,20 +50,21 @@ Feature: oc_volume.feature
   @smoke
   Scenario: Add secret volume to dc and rc
     Given I have a project
-    When I run the :run client command with:
-      | name   | mydc                                                                                                  |
-      | image  | quay.io/openshifttest/storage@sha256:a05b96d373be86f46e76817487027a7f5b8b5f87c0ac18a246b018df11529b40 |
+    When I run the :create client command with:
+      | f | <%= BushSlicer::HOME %>/testdata/storage/misc/dc.yaml |
     Then the step should succeed
+    Given a pod becomes ready with labels:
+      | deploymentconfig=frontend |
     When I run the :create_secret client command with:
       | secret_type | generic    |
       | name        | my-secret  |
       | from_file   | /etc/hosts |
     Then the step should succeed
 
-    Given I wait until replicationController "mydc-1" is ready
+    Given I wait until replicationController "frontend-1" is ready
     When I run the :set_volume client command with:
       | resource      | rc                |
-      | resource_name | mydc-1            |
+      | resource_name | frontend-1        |
       | action        | --add             |
       | name          | secret            |
       | type          | secret            |
@@ -73,7 +74,7 @@ Feature: oc_volume.feature
 
     When I run the :set_volume client command with:
       | resource      | dc                |
-      | resource_name | mydc              |
+      | resource_name | frontend          |
       | action        | --add             |
       | name          | secret            |
       | type          | secret            |
@@ -82,10 +83,10 @@ Feature: oc_volume.feature
     Then the step should succeed
 
     When I run the :get client command with:
-      | resource       | :false    |
-      | resource_name  | dc/mydc   |
-      | resource_name  | rc/mydc-1 |
-      | o              | yaml      |
+      | resource       | :false        |
+      | resource_name  | dc/frontend   |
+      | resource_name  | rc/frontend-2 |
+      | o              | yaml          |
     Then the step should succeed
     # The output has "name: secret" prefixed with both "  " (2 spaces) and "- " ("-" and 1 space).
     # Using <%= "  name: secret" %> can reduce script lines. Otherwise, would contain 4 times of it
